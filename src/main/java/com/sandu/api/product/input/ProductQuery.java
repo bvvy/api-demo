@@ -34,27 +34,17 @@ public class ProductQuery implements Serializable {
     private String productName;
 
     @ApiModelProperty(value = "页码", required = true)
-    @Min(value = 1, message = "请输入正确的数值")
+    @Min(value = 1, message = "请输入正确的页码数值")
     @NotNull(message = "页码不能为空")
     private Integer page;
 
     @ApiModelProperty(value = "条数", required = true)
-    @Min(value = 1, message = "请输入正确的数值")
+    @Min(value = 1, message = "请输入正确的条数数值")
     @NotNull(message = "条数不能为空")
     private Integer limit;
-    /**
-     * 排序字段
-     */
-    @ApiModelProperty(value = "排序字段")
-    private String orderField;
-    /**
-     * 排序方式
-     */
-    @ApiModelProperty(value = "排序方式")
-    private String orderMethod;
-
 
     @ApiModelProperty(value = "产品型号")
+    @Length(max = 50, message = "请输入正确的产品型号")
     private String productModelNumber;
 
 }

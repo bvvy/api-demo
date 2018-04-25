@@ -18,25 +18,27 @@ import java.io.Serializable;
 @Data
 public class ProductUpdate implements Serializable {
 
-    @ApiModelProperty(value = "产品编码", hidden = true)
+    @ApiModelProperty(value = "产品编码",required = true)
+    @NotEmpty(message = "产品编码不能为空")
+    @Size(min = 1, max = 20, message = "产品名称长度应在{min}-{max}之间")
     private String code;
 
     @ApiModelProperty(value = "产品名称", required = true)
     @NotEmpty(message = "产品名称不能为空")
-    @Size(min = 1, max = 20, message = "长度应在{min}-{max}之间")
+    @Size(min = 1, max = 20, message = "产品名称长度应在{min}-{max}之间")
     private String name;
 
 
     @ApiModelProperty(value = "建议售价")
-    @Max(value = 100000, message = "数值超出限制,100000")
+    @Max(value = 100000, message = "建议售价数值超出限制,100000")
     private Double advicePrice;
 
     @ApiModelProperty(value = "售价")
-    @Max(value = 100000, message = "数值超出限制,100000")
+    @Max(value = 100000, message = "售价数值超出限制,100000")
     private Double price;
 
     @ApiModelProperty(value = "产品描述")
-    @Length(max = 5000, message = "描述长度超过{max}")
+    @Length(max = 5000, message = "产品描述长度超过{max}")
     private String desc;
 
 
