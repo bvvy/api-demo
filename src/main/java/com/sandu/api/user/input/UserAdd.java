@@ -11,6 +11,5 @@ import lombok.Data;
  * @datetime 2018/4/24 11:46
  */
 @Data
-public class UserAdd
-{
+public class UserAdd {
 }
