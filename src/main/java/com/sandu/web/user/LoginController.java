@@ -58,8 +58,13 @@ public class LoginController extends BaseController {
     @PostMapping
     @ApiOperation(value = "退出登录", response = ReturnData.class)
     public ReturnData logout(@Valid @RequestBody Token token, BindingResult br) {
-        return ReturnDataUtil.validReturner(br, token, tk -> LoginContext.removeLoginInfo(tk.getToken()));
+        if (br.hasErrors()) {
+            return processValidError(br, ReturnData.builder());
+        }
+        LoginContext.removeLoginInfo(token.getToken());
+        return ReturnData.builder().code(ResponseEnum.SUCCESS);
     }
+
 
     @Data
     @ApiModel("token")
