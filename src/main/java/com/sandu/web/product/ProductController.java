@@ -13,6 +13,7 @@ import com.sandu.api.product.service.biz.ProductBizService;
 import com.sandu.common.BaseController;
 import com.sandu.common.ReturnData;
 import com.sandu.constant.ResponseEnum;
+import com.sandu.web.auth.Permission;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.sandu.util.Commoner.isEmpty;
+import static com.sandu.util.ReturnDataUtil.*;
 
 /**
  * CopyRight (c) 2018 Sandu Technology Inc.
@@ -46,38 +43,13 @@ import static com.sandu.util.Commoner.isEmpty;
 @Slf4j
 public class ProductController extends BaseController {
 
-    private <T, R> ReturnData<R> objReturner(T source, Function<T, R> fun) {
-        if (isEmpty(source)) {
-            return ReturnData.builder().code(ResponseEnum.NOT_CONTENT);
-        } else {
-            return ReturnData.builder().data(fun.apply(source)).code(ResponseEnum.SUCCESS);
-        }
-    }
 
-    private <T, R> ReturnData<R> pageReturner(PageInfo<T> pageInfo, Function<T, R> fun) {
-        if (isEmpty(pageInfo.getList())) {
-            return ReturnData.builder().list(pageInfo.getList()).total(pageInfo.getTotal()).code(ResponseEnum.NOT_CONTENT);
-        } else {
-            List<R> vos = pageInfo.getList().
-                    stream().map(fun).collect(Collectors.toList());
-            return ReturnData.builder().list(vos).total(pageInfo.getTotal()).code(ResponseEnum.SUCCESS);
-        }
-    }
-
-    private <T> ReturnData validReturner(BindingResult br, T obj, Consumer<T> consumer) {
-
-        if (br.hasErrors()) {
-            return processValidError(br, ReturnData.builder());
-        } else {
-            consumer.accept(obj);
-            return ReturnData.builder().code(ResponseEnum.SUCCESS);
-        }
-    }
 
     @Resource
     private ProductBizService productBizService;
 
     @GetMapping("/{productId}")
+    @Permission("product:view")
     @ApiOperation(value = "获取单个产品", response = ProductVO.class)
     public ReturnData<ProductVO> getProductInfo(@PathVariable Long productId) {
         ProductBO product = productBizService.getProductInfoById(productId);
@@ -90,6 +62,7 @@ public class ProductController extends BaseController {
 
     @ApiOperation(value = "获取查询结果", response = ProductListVO.class)
     @GetMapping("/list")
+    @Permission("product:view")
     public ReturnData<ProductListVO> listProduct(@Valid ProductQuery productQuery, BindingResult br) {
         if (br.hasErrors()) {
             return processValidError(br, ReturnData.builder());
@@ -109,19 +82,22 @@ public class ProductController extends BaseController {
 
     @ApiOperation(value = "删除", response = ReturnData.class)
     @DeleteMapping
-    @Valid
-    public ReturnData deleteProduct(@NotEmpty(message = "删除的id不能为空") @RequestParam String ids, BindingResult br) {
-        return validReturner(br, ids, idstr -> Arrays.stream(idstr.split(",")).forEach(it -> productBizService.deleteProductById(Long.parseLong(it))));
+    @Permission("product:del")
+    public ReturnData deleteProduct(@RequestParam String ids) {
+        Arrays.stream(ids.split(",")).forEach(it -> productBizService.deleteProductById(Long.parseLong(it)));
+        return ReturnData.builder().code(ResponseEnum.SUCCESS).message("success");
     }
 
     @ApiOperation(value = "添加", response = ReturnData.class)
     @PostMapping
+    @Permission("product:add")
     public ReturnData addProduct(@Valid @RequestBody ProductAdd productAdd, BindingResult br) {
         return validReturner(br, productAdd, productBizService::saveProduct);
     }
 
     @ApiOperation(value = "修改", response = ReturnData.class)
     @PutMapping
+    @Permission("product:edit")
     public ReturnData updateProduct(@RequestBody @Valid ProductUpdate productUpdate, BindingResult br) {
         return validReturner(br, productUpdate, productBizService::updateProduct);
     }
